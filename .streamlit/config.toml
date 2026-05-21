@@ -1,0 +1,11 @@
+[theme]
+primaryColor = "#1c82e1"
+
+[theme.sidebar]
+primaryColor = "#1c82e1"
+
+[client]
+toolbarMode = "minimal"
+
+[ui]
+hideTopBar = true
