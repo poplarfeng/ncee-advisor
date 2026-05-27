@@ -78,6 +78,9 @@ def clean_data(raw_schools):
 
     score_cols = ['2022分数线', '2023分数线', '2024分数线', '2025分数线']
 
+    # 将省份datafame中省份数据与geojson文件中的省份名称保持一致
+    raw_schools['省份'] = raw_schools['省份'].map(PROVINCE_NAME_MAPPING)
+
     # 复制数据，后续处理不影响原始数据
     clean_schools = raw_schools.copy()
     clean_schools['软科排名'] = clean_schools['软科排名'].replace(0, np.nan)
@@ -89,9 +92,7 @@ def clean_data(raw_schools):
     # 下面的语句在pandas 3.0+版本会有告警提示，推荐使用当前的语法
     # df_schools_seclected.loc[:, score_cols] = df_schools_selected.loc[:, score_cols].replace(0, np.nan)
 
-    # 将省份datafame中省份数据与geojson文件中的省份名称保持一致
-    clean_schools['省份'] = clean_schools['省份'].map(PROVINCE_NAME_MAPPING)
-
+  
 
     return clean_schools
 
