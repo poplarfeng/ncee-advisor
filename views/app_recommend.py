@@ -426,30 +426,66 @@ def get_recommend_schools_distribution(df1: pd.DataFrame, df2: pd.DataFrame, df3
         columns_hide = ['选科类型', 'ID']
         columns_show = [col for col in schools_province_select if col not in columns_hide]
         # 计算选择省份数据院校数量与专业数量
-        school_nums = len(schools_province_select['学校名称'].dropna().unique())
+        pro_schools = schools_province_select['学校名称'].dropna().unique()
+        school_nums = len(pro_schools)
         special_nums = len(schools_province_select)
-        # 重置索引，用于在st.dataframe展示时应用斑马纹效果
-        schools_provice_select_resetindex = schools_province_select.reset_index(drop=True)
-        styled_schools_province_select = (
-            schools_provice_select_resetindex
-            .style
-            .apply(set_alternating_colors, axis=None)
-        )
+        # 计算选择省份数据的招生年份
+        pro_years = schools_province_select['招生年份'].dropna().unique()
 
         popover_label_province = f'【:red[{province_select}]】推荐院校与专业详细信息(✅院校 【:red[{school_nums}]】所, 专业【:red[{special_nums}]】个), 点击查看详情......'
         with st.popover(label=popover_label_province, width='stretch'):
 
-            # 显示所点选省份推荐院校与专业信息（注：当前地图装载的数据是对应的推荐档位院校数据
-            st.markdown(
-                f'###### :material/layers: {province_select}', unsafe_allow_html=True
-            )
-            st.dataframe(
-                styled_schools_province_select, 
-                width='stretch',
-                # height=400,
-                hide_index=True,
-                column_order=columns_show
-            )
+            pro_col1, pro_col2, pro_col3 = st.columns([3, 3, 4], vertical_alignment='center')
+            with pro_col1:
+                # 显示所点选省份推荐院校与专业信息（注：当前地图装载的数据是对应的推荐档位院校数据
+                st.markdown(
+                    f'###### :material/layers: {province_select}', unsafe_allow_html=True
+                )
+            with pro_col2:
+                col2_1, col2_2 = st.columns([1, 2], vertical_alignment='center')
+                with col2_1:
+                    st.markdown('招生年份')
+                with col2_2:
+                    pro_year = st.selectbox(
+                        '招生年份',
+                        options=['不限']+list(sorted(pro_years)),
+                        label_visibility='collapsed',
+                        index=0
+                    )
+            with pro_col3:
+                col3_1, col3_2 = st.columns([2, 5], vertical_alignment='center')
+                with col3_1:
+                    st.markdown('学校名称')
+                with col3_2:
+                    pro_school = st.selectbox(
+                        '学校名称',
+                        options=['不限']+list(sorted(pro_schools)),
+                        label_visibility='collapsed',
+                        index=0
+                    )
+            
+            if pro_year != '不限':
+                schools_province_select = schools_province_select[schools_province_select['招生年份'] == pro_year]
+            if pro_school != '不限':
+                schools_province_select = schools_province_select[schools_province_select['学校名称'] == pro_school]
+
+            if schools_province_select.empty:
+                 st.info(':information_source: :blue[没有符合条件的推荐院校...]')
+            else:
+                # 重置索引，用于在st.dataframe展示时应用斑马纹效果
+                schools_provice_select_resetindex = schools_province_select.reset_index(drop=True)
+                styled_schools_province_select = (
+                    schools_provice_select_resetindex
+                    .style
+                    .apply(set_alternating_colors, axis=None)
+                )
+                st.dataframe(
+                    styled_schools_province_select, 
+                    width='stretch',
+                    # height=400,
+                    hide_index=True,
+                    column_order=columns_show
+                )
     else:
         st.info(':information_source: :blue[需要查看某个省份推荐院校与专业详细信息，请在地图上面点选相应区域...]')
 
